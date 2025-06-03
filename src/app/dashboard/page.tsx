@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { supabase } from '@/app/utils/supabaseClient';
 import { Button } from '@/components/ui/button';
 import type { User } from '@supabase/supabase-js';
 
@@ -14,11 +13,14 @@ export default function Dashboard() {
   const [toneEnabled, setToneEnabled] = useState(true);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const getUser = async () => {
+    // Only run Supabase logic in the browser
+    const getUser = async () => {
+      if (typeof window !== 'undefined') {
+        const { supabase } = await import('@/app/utils/supabaseClient'); // lazy import
+
         const {
           data: { user },
-          error
+          error,
         } = await supabase.auth.getUser();
 
         if (error) {
@@ -26,9 +28,10 @@ export default function Dashboard() {
         } else {
           setUser(user);
         }
-      };
-      getUser();
-    }
+      }
+    };
+
+    getUser();
   }, []);
 
   return (
