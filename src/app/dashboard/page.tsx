@@ -4,31 +4,32 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/app/utils/supabaseClient';
 import { Button } from '@/components/ui/button';
-import type { User } from '@supabase/supabase-js'; // ✅ Add this
 
 export default function Dashboard() {
-  const [user, setUser] = useState<User | null>(null); // ✅ Fix type
-
+  const [user, setUser] = useState<any>(null); // optionally type more strictly
   const [videoTitle, setVideoTitle] = useState('');
   const [videoCategory, setVideoCategory] = useState('');
   const [videoDescription, setVideoDescription] = useState('');
   const [toneEnabled, setToneEnabled] = useState(true);
 
   useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: { user },
-        error
-      } = await supabase.auth.getUser();
+    if (typeof window !== 'undefined') {
+      const getUser = async () => {
+        const {
+          data: { user },
+          error
+        } = await supabase.auth.getUser();
 
-      if (error) {
-        console.error('Error getting user:', error.message);
-      } else {
-        setUser(user);
-      }
-    };
-    getUser();
+        if (error) {
+          console.error('Error getting user:', error.message);
+        } else {
+          setUser(user);
+        }
+      };
+      getUser();
+    }
   }, []);
+
 
   return (
     <div className="flex min-h-screen text-white">
