@@ -19,6 +19,7 @@ export default function SignupPage() {
   const handleSignup = async () => {
     setLoading(true)
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data, error: signupError } = await supabase.auth.signUp({
       email,
       password,
