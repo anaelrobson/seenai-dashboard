@@ -20,7 +20,7 @@ export default function SignupPage() {
 
     const { supabase } = await import('@/app/utils/supabaseClient')
 
-    const { data, error: signupError } = await supabase.auth.signUp({
+  const { error: signupError } = await supabase.auth.signUp({
       email,
       password,
       options: {
