@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/app/utils/supabaseClient';
 import { Button } from '@/components/ui/button';
+import type { User } from '@supabase/supabase-js';
 
 export default function Dashboard() {
-  const [user, setUser] = useState<any>(null); // optionally type more strictly
+  const [user, setUser] = useState<User | null>(null);
   const [videoTitle, setVideoTitle] = useState('');
   const [videoCategory, setVideoCategory] = useState('');
   const [videoDescription, setVideoDescription] = useState('');
@@ -29,7 +30,6 @@ export default function Dashboard() {
       getUser();
     }
   }, []);
-
 
   return (
     <div className="flex min-h-screen text-white">
