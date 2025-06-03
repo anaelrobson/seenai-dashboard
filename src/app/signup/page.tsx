@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { supabase } from '@/app/utils/supabaseClient'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -19,7 +18,8 @@ export default function SignupPage() {
   const handleSignup = async () => {
     setLoading(true)
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { supabase } = await import('@/app/utils/supabaseClient')
+
     const { data, error: signupError } = await supabase.auth.signUp({
       email,
       password,
@@ -98,7 +98,6 @@ export default function SignupPage() {
         </p>
       </div>
 
-      {/* 🔥 Clickable Hover Logo in Bottom Right */}
       <a
         href="https://seen-ai.com"
         target="_blank"

@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { supabase } from '@/app/utils/supabaseClient'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -16,6 +15,8 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setLoading(true)
 
+    const { supabase } = await import('@/app/utils/supabaseClient')
+
     const { error: loginError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -27,7 +28,7 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/dashboard') // or your app’s main screen
+    router.push('/dashboard')
   }
 
   return (
@@ -66,7 +67,6 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* 🔥 Bottom-right clickable logo with animation */}
       <a
         href="https://seen-ai.com"
         target="_blank"
