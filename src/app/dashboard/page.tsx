@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/app/utils/supabaseClient';
 import { Button } from '@/components/ui/button';
+import type { User } from '@supabase/supabase-js'; // ✅ Add this
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null); // ✅ Fix type
+
   const [videoTitle, setVideoTitle] = useState('');
   const [videoCategory, setVideoCategory] = useState('');
   const [videoDescription, setVideoDescription] = useState('');
