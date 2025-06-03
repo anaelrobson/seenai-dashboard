@@ -1,10 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 
 export default function SignupPage() {
+  const router = useRouter()
+
+  // 🔁 Redirect from / to /signup during client-side render
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.pathname === '/') {
+      router.replace('/signup')
+    }
+  }, [router])
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [firstName, setFirstName] = useState('')
@@ -13,12 +22,9 @@ export default function SignupPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const router = useRouter()
-
   const handleSignup = async () => {
     setLoading(true)
 
-    // ✅ Lazy import to avoid SSR issues during build
     const { supabase } = await import('@/app/utils/supabaseClient')
 
     const { error: signupError } = await supabase.auth.signUp({
