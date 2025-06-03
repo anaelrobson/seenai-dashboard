@@ -18,9 +18,10 @@ export default function SignupPage() {
   const handleSignup = async () => {
     setLoading(true)
 
+    // ✅ Lazy import to avoid SSR issues during build
     const { supabase } = await import('@/app/utils/supabaseClient')
 
-  const { error: signupError } = await supabase.auth.signUp({
+    const { error: signupError } = await supabase.auth.signUp({
       email,
       password,
       options: {
