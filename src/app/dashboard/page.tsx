@@ -4,20 +4,28 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import type { User } from '@supabase/supabase-js';
+import { supabase } from '@/utils/supabaseClient';
+
+interface Video {
+  id: string;
+  title: string;
+  file_url: string;
+  created_at: string;
+  thumbnail_url?: string;
+  gpt_notes?: string;
+}
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
+  const [videos, setVideos] = useState<Video[]>([]);
   const [videoTitle, setVideoTitle] = useState('');
   const [videoCategory, setVideoCategory] = useState('');
   const [videoDescription, setVideoDescription] = useState('');
   const [toneEnabled, setToneEnabled] = useState(true);
 
   useEffect(() => {
-    // Only run Supabase logic in the browser
     const getUser = async () => {
       if (typeof window !== 'undefined') {
-        const { supabase } = await import('@/app/utils/supabaseClient'); // lazy import
-
         const {
           data: { user },
           error,
@@ -33,6 +41,26 @@ export default function Dashboard() {
 
     getUser();
   }, []);
+
+  useEffect(() => {
+    const fetchVideos = async () => {
+      if (!user) return;
+      const { data, error } = await supabase
+        .from('videos')
+        .select('id, title, file_url, created_at, thumbnail_url, gpt_notes')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (error) {
+        console.error('Failed to fetch videos:', error);
+      } else {
+        setVideos(data || []);
+      }
+    };
+
+    fetchVideos();
+  }, [user]);
 
   return (
     <div className="flex min-h-screen text-white">
@@ -113,12 +141,37 @@ export default function Dashboard() {
         <section className="mt-10">
           <h3 className="text-lg font-semibold mb-4">Your Recent Uploads</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-[#111] rounded-xl border border-zinc-800 p-4">
-                <div className="bg-zinc-900 h-40 rounded-lg mb-2" />
-                <h4 className="text-white text-sm font-medium">Video #{i}</h4>
-              </div>
-            ))}
+            {videos.length === 0 ? (
+              <p className="text-zinc-500 text-sm col-span-full">No uploads found.</p>
+            ) : (
+              videos.map((video) => (
+                <div key={video.id} className="bg-[#111] rounded-xl border border-zinc-800 p-4">
+                  {video.thumbnail_url ? (
+                    <img
+                      src={video.thumbnail_url}
+                      alt="Video thumbnail"
+                      className="w-full h-40 object-cover rounded-md mb-2"
+                    />
+                  ) : (
+                    <div className="bg-zinc-900 h-40 rounded-lg mb-2 flex items-center justify-center text-zinc-500 text-sm">
+                      No Thumbnail
+                    </div>
+                  )}
+                  <h4 className="text-white text-sm font-medium truncate">{video.title || 'Untitled Video'}</h4>
+                  <p className="text-zinc-500 text-xs mb-1">{new Date(video.created_at).toLocaleDateString()}</p>
+                  <a
+                    href={video.file_url}
+                    target="_blank"
+                    className="text-blue-400 text-xs hover:underline"
+                  >
+                    View Video
+                  </a>
+                  {video.gpt_notes && (
+                    <p className="text-xs mt-2 italic text-white/70 line-clamp-2">{video.gpt_notes}</p>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </section>
       </main>
