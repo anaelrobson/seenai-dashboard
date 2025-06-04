@@ -71,7 +71,7 @@ export default function Dashboard() {
     const fileExt = selectedFile.name.split('.').pop();
     const filePath = `${user.id}/${Date.now()}.${fileExt}`;
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('user-uploads')
       .upload(filePath, selectedFile);
 
