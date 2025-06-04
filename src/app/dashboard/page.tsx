@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import type { User } from '@supabase/supabase-js';
-import { supabase } from '@/utils/supabaseClient';
+import { supabase } from '../utils/supabaseClient';
 
 interface Video {
   id: string;
