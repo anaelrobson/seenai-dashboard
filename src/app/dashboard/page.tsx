@@ -22,6 +22,7 @@ export default function Dashboard() {
   const [videoCategory, setVideoCategory] = useState('');
   const [videoDescription, setVideoDescription] = useState('');
   const [toneEnabled, setToneEnabled] = useState(true);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -42,25 +43,71 @@ export default function Dashboard() {
     getUser();
   }, []);
 
+  const fetchVideos = async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('videos')
+      .select('id, title, file_url, created_at, thumbnail_url, gpt_notes')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    if (error) {
+      console.error('Failed to fetch videos:', error);
+    } else {
+      setVideos(data || []);
+    }
+  };
+
   useEffect(() => {
-    const fetchVideos = async () => {
-      if (!user) return;
-      const { data, error } = await supabase
-        .from('videos')
-        .select('id, title, file_url, created_at, thumbnail_url, gpt_notes')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      if (error) {
-        console.error('Failed to fetch videos:', error);
-      } else {
-        setVideos(data || []);
-      }
-    };
-
     fetchVideos();
   }, [user]);
+
+  const handleUpload = async () => {
+    if (!user) return alert('User not authenticated.');
+    if (!videoTitle.trim() || !videoCategory.trim()) return alert('Title and category are required.');
+    if (!selectedFile) return alert('Please select a video file.');
+
+    const fileExt = selectedFile.name.split('.').pop();
+    const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('user-uploads')
+      .upload(filePath, selectedFile);
+
+    if (uploadError) {
+      console.error('File upload error:', uploadError);
+      return alert('File upload failed.');
+    }
+
+    const { data: urlData } = supabase.storage.from('user-uploads').getPublicUrl(filePath);
+
+    const { error } = await supabase.from('videos').insert([
+      {
+        user_id: user.id,
+        title: videoTitle,
+        category: videoCategory,
+        description: videoDescription,
+        file_url: urlData.publicUrl,
+        status: 'pending',
+        tone_data: toneEnabled ? {} : null,
+        created_at: new Date().toISOString()
+      }
+    ]);
+
+    if (error) {
+      console.error('Metadata insert failed:', error);
+      alert('Metadata save failed.');
+    } else {
+      alert('Video uploaded and saved!');
+      setVideoTitle('');
+      setVideoCategory('');
+      setVideoDescription('');
+      setToneEnabled(true);
+      setSelectedFile(null);
+      fetchVideos();
+    }
+  };
 
   return (
     <div className="flex min-h-screen text-white">
@@ -83,7 +130,7 @@ export default function Dashboard() {
       <main className="flex-1 bg-[#0b0b0b] p-10 overflow-y-auto">
         <div className="flex justify-between items-center mb-10">
           <h1 className="text-3xl font-bold">Hello, {user?.user_metadata?.first_name || 'friend'}.</h1>
-          <Button variant="secondary">Upload Video</Button>
+          <Button variant="secondary" onClick={handleUpload}>Upload Video</Button>
         </div>
 
         {/* Upload Section */}
@@ -131,6 +178,13 @@ export default function Dashboard() {
             />
             Extract Tone & Emotion
           </label>
+
+          <input
+            type="file"
+            accept="video/*"
+            onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+            className="mt-4 text-sm"
+          />
 
           <div className="mt-6 border border-dashed border-zinc-600 rounded-lg p-6 text-center text-zinc-400">
             Drag & drop your video here or click to browse files
