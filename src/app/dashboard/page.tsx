@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
 interface Video {
   id: string;
@@ -27,8 +27,6 @@ export default function Dashboard() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
-  const dropRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -88,7 +86,7 @@ export default function Dashboard() {
         file_url: urlData.publicUrl,
         status: 'pending',
         tone_data: toneEnabled ? {} : null,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       }
     ]);
 
@@ -104,21 +102,6 @@ export default function Dashboard() {
       setSelectedFile(null);
       fetchVideos();
     }
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('video/')) {
-      setSelectedFile(file);
-      setErrorMessage('');
-    } else {
-      setErrorMessage('Only video files are supported.');
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
   };
 
   return (
@@ -232,12 +215,7 @@ export default function Dashboard() {
             </motion.div>
           )}
 
-          <div
-            ref={dropRef}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            className="mt-6 border border-dashed border-zinc-600 rounded-lg p-6 text-center text-zinc-400"
-          >
+          <div className="mt-6 border border-dashed border-zinc-600 rounded-lg p-6 text-center text-zinc-400">
             Drag & drop your video here or click to browse files
           </div>
         </motion.div>
