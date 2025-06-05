@@ -120,12 +120,7 @@ export default function Dashboard() {
   };
 
   return (
-    <motion.div
-      className="flex min-h-screen text-white"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <motion.div className="flex min-h-screen text-white" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
       <aside className="w-64 bg-black border-r border-zinc-800 p-6 flex flex-col justify-between">
         <div>
           <motion.a
@@ -149,7 +144,112 @@ export default function Dashboard() {
         <div className="text-xs text-zinc-500">Logged in as: {user?.email || 'Loading...'}</div>
       </aside>
 
-      {/* ...rest of the component remains unchanged... */}
+      <main className="flex-1 bg-[#0b0b0b] p-10 overflow-y-auto">
+        <div className="bg-[#111] border border-zinc-800 rounded-2xl p-6 max-w-4xl mx-auto">
+          <h2 className="text-xl font-semibold mb-2">Upload your video</h2>
+          <p className="text-sm text-zinc-400 mb-4">
+            SeenAI will analyze your tone, emotion, and transcript to give personalized feedback.
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="Video Title"
+              value={videoTitle}
+              onChange={(e) => setVideoTitle(e.target.value)}
+              className="bg-black border border-white/20 rounded-lg p-2"
+            />
+            <select
+              value={videoCategory}
+              onChange={(e) => setVideoCategory(e.target.value)}
+              className="bg-black border border-white/20 rounded-lg p-2"
+            >
+              <option value="">Select Category</option>
+              <option value="education">🎓 Education</option>
+              <option value="pitch">📈 Pitch</option>
+              <option value="speaking">🎙️ Speaking</option>
+              <option value="freestyle">🎤 Freestyle</option>
+            </select>
+          </div>
+
+          <textarea
+            placeholder="Describe what’s happening in the video..."
+            value={videoDescription}
+            onChange={(e) => setVideoDescription(e.target.value)}
+            className="w-full bg-black border border-white/20 rounded-lg p-2 mt-4"
+          />
+
+          <label className="flex items-center mt-4 text-sm">
+            <input
+              type="checkbox"
+              checked={toneEnabled}
+              onChange={(e) => setToneEnabled(e.target.checked)}
+              className="mr-2"
+            />
+            Extract Tone & Emotion
+          </label>
+
+          {selectedFile && (
+            <video controls className="mt-4 w-full max-h-[300px] rounded-md">
+              <source src={URL.createObjectURL(selectedFile)} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          )}
+
+          {errorMessage && <p className="mt-4 text-red-500 text-sm">{errorMessage}</p>}
+          {successMessage && (
+            <div className="mt-4 flex items-center gap-2 text-green-500 text-sm">
+              <CheckCircle size={16} /> Upload successful!
+            </div>
+          )}
+
+          <div
+            className="mt-6 border border-dashed border-zinc-600 rounded-lg p-6 text-center text-zinc-400 hover:border-white cursor-pointer"
+            onDrop={handleDrop}
+            onDragOver={(e) => e.preventDefault()}
+            onClick={handleBrowseClick}
+          >
+            Drag & drop your video here or click to browse files
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="video/*"
+              hidden
+              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+            />
+          </div>
+
+          <div className="mt-4 text-right">
+            <Button onClick={handleUpload} disabled={uploading}>
+              {uploading ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : 'Upload Video'}
+            </Button>
+          </div>
+        </div>
+
+        <section className="mt-10">
+          <h3 className="text-lg font-semibold mb-4">Your Recent Uploads</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {videos.map((video) => (
+              <motion.div
+                key={video.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-[#111] rounded-xl border border-zinc-800 p-4"
+              >
+                <div className="bg-zinc-900 h-40 rounded-lg mb-2 flex items-center justify-center text-zinc-600 text-sm">
+                  No Thumbnail
+                </div>
+                <h4 className="text-white text-sm font-medium truncate">{video.title}</h4>
+                <p className="text-xs text-zinc-500">{new Date(video.created_at).toLocaleDateString()}</p>
+                <a href={video.file_url} target="_blank" className="text-blue-500 text-xs mt-1 block">
+                  View Video
+                </a>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      </main>
     </motion.div>
   );
 }
