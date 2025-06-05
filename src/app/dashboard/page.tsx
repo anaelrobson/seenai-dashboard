@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle } from 'lucide-react';
 
 interface Video {
   id: string;
@@ -27,6 +27,7 @@ export default function Dashboard() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -58,6 +59,7 @@ export default function Dashboard() {
 
   const handleUpload = async () => {
     setErrorMessage('');
+    setSuccessMessage('');
     if (!user) return setErrorMessage('User not authenticated.');
     if (!videoTitle.trim() || !videoCategory.trim()) return setErrorMessage('Title and category are required.');
     if (!selectedFile) return setErrorMessage('Please select a video file.');
@@ -101,6 +103,7 @@ export default function Dashboard() {
       setVideoDescription('');
       setToneEnabled(true);
       setSelectedFile(null);
+      setSuccessMessage('Upload complete!');
       fetchVideos();
     }
   };
@@ -124,19 +127,17 @@ export default function Dashboard() {
       transition={{ duration: 0.5 }}
     >
       <aside className="w-64 bg-black border-r border-zinc-800 p-6 flex flex-col justify-between">
-        <div>
-          <motion.div
-            className="mb-8 cursor-pointer"
-            whileHover={{ scale: 1.15 }}
-            transition={{ type: 'spring', stiffness: 300 }}
-            onClick={() => window.open('https://seen-ai.com', '_blank')}
-          >
-            <Image src="/seenailogo.png" alt="SeenAI Logo" width={60} height={60} />
-          </motion.div>
-          <nav className="flex flex-col gap-4 text-zinc-400">
-            <a href="https://chatgpt.com/g/g-6807e8981c5881919b3abb34f11a3226-seenai" target="_blank" className="hover:text-white">Talk to SeenAI</a>
-          </nav>
-        </div>
+        <motion.a
+          href="https://seen-ai.com"
+          className="mb-8"
+          whileHover={{ scale: 1.15 }}
+          transition={{ type: 'spring', stiffness: 300 }}
+        >
+          <Image src="/seenailogo.png" alt="SeenAI Logo" width={70} height={70} />
+        </motion.a>
+        <nav className="flex flex-col gap-4 text-zinc-400">
+          <a href="https://chatgpt.com/g/g-6807e8981c5881919b3abb34f11a3226-seenai" target="_blank" className="hover:text-white">Talk to SeenAI</a>
+        </nav>
         <div className="text-xs text-zinc-500">Logged in as: {user?.email || 'Loading...'}</div>
       </aside>
 
@@ -209,7 +210,7 @@ export default function Dashboard() {
           {selectedFile && (
             <video
               controls
-              className="mt-4 rounded-md border border-white/10 max-h-80 w-full object-contain"
+              className="mt-4 rounded-md border border-white/10 max-h-[300px] w-full object-contain"
             >
               <source src={URL.createObjectURL(selectedFile)} />
               Your browser does not support the video tag.
@@ -223,6 +224,16 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
             >
               {errorMessage}
+            </motion.div>
+          )}
+
+          {successMessage && (
+            <motion.div
+              className="text-green-400 text-sm mt-2 flex items-center gap-2"
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <CheckCircle className="w-4 h-4" /> {successMessage}
             </motion.div>
           )}
 
