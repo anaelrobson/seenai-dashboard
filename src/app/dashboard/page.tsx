@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, CheckCircle } from 'lucide-react';
 
 interface Video {
   id: string;
@@ -23,23 +25,20 @@ export default function Dashboard() {
   const [videoDescription, setVideoDescription] = useState('');
   const [toneEnabled, setToneEnabled] = useState(true);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const dropRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
-      if (typeof window !== 'undefined') {
-        const {
-          data: { user },
-          error,
-        } = await supabase.auth.getUser();
-
-        if (error) {
-          console.error('Error getting user:', error.message);
-        } else {
-          setUser(user);
-        }
-      }
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+      if (error) console.error('Error getting user:', error.message);
+      else setUser(user);
     };
-
     getUser();
   }, []);
 
@@ -51,12 +50,7 @@ export default function Dashboard() {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(3);
-
-    if (error) {
-      console.error('Failed to fetch videos:', error);
-    } else {
-      setVideos(data || []);
-    }
+    if (!error) setVideos(data || []);
   };
 
   useEffect(() => {
@@ -64,10 +58,12 @@ export default function Dashboard() {
   }, [user]);
 
   const handleUpload = async () => {
-    if (!user) return alert('User not authenticated.');
-    if (!videoTitle.trim() || !videoCategory.trim()) return alert('Title and category are required.');
-    if (!selectedFile) return alert('Please select a video file.');
+    setErrorMessage('');
+    if (!user) return setErrorMessage('User not authenticated.');
+    if (!videoTitle.trim() || !videoCategory.trim()) return setErrorMessage('Title and category are required.');
+    if (!selectedFile) return setErrorMessage('Please select a video file.');
 
+    setUploading(true);
     const fileExt = selectedFile.name.split('.').pop();
     const filePath = `${user.id}/${Date.now()}.${fileExt}`;
 
@@ -76,13 +72,14 @@ export default function Dashboard() {
       .upload(filePath, selectedFile);
 
     if (uploadError) {
-      console.error('File upload error:', uploadError);
-      return alert('File upload failed.');
+      setErrorMessage('File upload failed.');
+      setUploading(false);
+      return;
     }
 
     const { data: urlData } = supabase.storage.from('user-uploads').getPublicUrl(filePath);
 
-    const { error } = await supabase.from('videos').insert([
+    const { error: insertError } = await supabase.from('videos').insert([
       {
         user_id: user.id,
         title: videoTitle,
@@ -95,11 +92,11 @@ export default function Dashboard() {
       }
     ]);
 
-    if (error) {
-      console.error('Metadata insert failed:', error);
-      alert('Metadata save failed.');
+    setUploading(false);
+
+    if (insertError) {
+      setErrorMessage('Metadata save failed.');
     } else {
-      alert('Video uploaded and saved!');
       setVideoTitle('');
       setVideoCategory('');
       setVideoDescription('');
@@ -109,14 +106,37 @@ export default function Dashboard() {
     }
   };
 
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('video/')) {
+      setSelectedFile(file);
+      setErrorMessage('');
+    } else {
+      setErrorMessage('Only video files are supported.');
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
   return (
-    <div className="flex min-h-screen text-white">
-      {/* Sidebar */}
+    <motion.div
+      className="flex min-h-screen text-white"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <aside className="w-64 bg-black border-r border-zinc-800 p-6 flex flex-col justify-between">
         <div>
-          <div className="mb-8">
-            <Image src="/seenailogo.png" alt="SeenAI Logo" width={40} height={40} />
-          </div>
+          <motion.div
+            className="mb-8"
+            whileHover={{ scale: 1.15 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+          >
+            <Image src="/seenailogo.png" alt="SeenAI Logo" width={60} height={60} />
+          </motion.div>
           <nav className="flex flex-col gap-4 text-zinc-400">
             <a href="#" className="hover:text-white">Dashboard</a>
             <a href="#" className="hover:text-white">Upload</a>
@@ -126,15 +146,21 @@ export default function Dashboard() {
         <div className="text-xs text-zinc-500">Logged in as: {user?.email || 'Loading...'}</div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 bg-[#0b0b0b] p-10 overflow-y-auto">
         <div className="flex justify-between items-center mb-10">
           <h1 className="text-3xl font-bold">Hello, {user?.user_metadata?.first_name || 'friend'}.</h1>
-          <Button variant="secondary" onClick={handleUpload}>Upload Video</Button>
+          <Button variant="secondary" onClick={handleUpload} disabled={uploading}>
+            {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+            Upload Video
+          </Button>
         </div>
 
-        {/* Upload Section */}
-        <div className="bg-[#111] border border-zinc-800 rounded-2xl p-6 mb-10 w-full max-w-4xl mx-auto">
+        <motion.div
+          className="bg-[#111] border border-zinc-800 rounded-2xl p-6 mb-10 w-full max-w-4xl mx-auto"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.4 }}
+        >
           <h2 className="text-xl font-semibold mb-2">Upload your video</h2>
           <p className="text-sm text-zinc-400 mb-4">
             SeenAI will analyze your tone, emotion, and transcript to give personalized feedback.
@@ -148,7 +174,6 @@ export default function Dashboard() {
               onChange={(e) => setVideoTitle(e.target.value)}
               className="bg-black border border-white/20 rounded-lg p-2"
             />
-
             <select
               value={videoCategory}
               onChange={(e) => setVideoCategory(e.target.value)}
@@ -183,15 +208,40 @@ export default function Dashboard() {
             type="file"
             accept="video/*"
             onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-            className="mt-4 text-sm"
+            className="mt-4 text-sm file:text-white file:bg-zinc-800 file:rounded-md"
           />
 
-          <div className="mt-6 border border-dashed border-zinc-600 rounded-lg p-6 text-center text-zinc-400">
+          {selectedFile && (
+            <video
+              controls
+              className="mt-4 rounded-md border border-white/10"
+              width="100%"
+            >
+              <source src={URL.createObjectURL(selectedFile)} />
+              Your browser does not support the video tag.
+            </video>
+          )}
+
+          {errorMessage && (
+            <motion.div
+              className="text-red-500 text-sm mt-2"
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              {errorMessage}
+            </motion.div>
+          )}
+
+          <div
+            ref={dropRef}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            className="mt-6 border border-dashed border-zinc-600 rounded-lg p-6 text-center text-zinc-400"
+          >
             Drag & drop your video here or click to browse files
           </div>
-        </div>
+        </motion.div>
 
-        {/* Recent Uploads Section */}
         <section className="mt-10">
           <h3 className="text-lg font-semibold mb-4">Your Recent Uploads</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -199,7 +249,13 @@ export default function Dashboard() {
               <p className="text-zinc-500 text-sm col-span-full">No uploads found.</p>
             ) : (
               videos.map((video) => (
-                <div key={video.id} className="bg-[#111] rounded-xl border border-zinc-800 p-4">
+                <motion.div
+                  key={video.id}
+                  className="bg-[#111] rounded-xl border border-zinc-800 p-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
                   {video.thumbnail_url ? (
                     <img
                       src={video.thumbnail_url}
@@ -223,12 +279,12 @@ export default function Dashboard() {
                   {video.gpt_notes && (
                     <p className="text-xs mt-2 italic text-white/70 line-clamp-2">{video.gpt_notes}</p>
                   )}
-                </div>
+                </motion.div>
               ))
             )}
           </div>
         </section>
       </main>
-    </div>
+    </motion.div>
   );
 }
