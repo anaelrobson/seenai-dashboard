@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import type { User } from '@supabase/supabase-js';
@@ -27,6 +27,7 @@ export default function Dashboard() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -104,6 +105,17 @@ export default function Dashboard() {
     }
   };
 
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setSelectedFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleBrowseClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <motion.div
       className="flex min-h-screen text-white"
@@ -111,27 +123,28 @@ export default function Dashboard() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <aside className="w-64 bg-black border-r border-zinc-800 p-6 flex flex-col justify-between">
+      <aside className="w-64 bg-gradient-to-b from-black to-zinc-900 border-r border-zinc-800 p-6 flex flex-col justify-between shadow-xl">
         <div>
           <motion.div
-            className="mb-8"
+            className="mb-8 cursor-pointer"
             whileHover={{ scale: 1.15 }}
             transition={{ type: 'spring', stiffness: 300 }}
+            onClick={() => window.open('https://seen-ai.com', '_blank')}
           >
             <Image src="/seenailogo.png" alt="SeenAI Logo" width={60} height={60} />
           </motion.div>
           <nav className="flex flex-col gap-4 text-zinc-400">
-            <a href="#" className="hover:text-white">Dashboard</a>
-            <a href="#" className="hover:text-white">Upload</a>
-            <a href="#" className="hover:text-white">Talk to SeenAI</a>
+            <a href="#" className="hover:text-white transition-colors">Dashboard</a>
+            <a href="#" className="hover:text-white transition-colors">Upload</a>
+            <a href="#" className="hover:text-white transition-colors">Talk to SeenAI</a>
           </nav>
         </div>
         <div className="text-xs text-zinc-500">Logged in as: {user?.email || 'Loading...'}</div>
       </aside>
 
-      <main className="flex-1 bg-[#0b0b0b] p-10 overflow-y-auto">
+      <main className="flex-1 bg-gradient-to-b from-[#0b0b0b] to-black p-10 overflow-y-auto">
         <div className="flex justify-between items-center mb-10">
-          <h1 className="text-3xl font-bold">Hello, {user?.user_metadata?.first_name || 'friend'}.</h1>
+          <h1 className="text-3xl font-bold drop-shadow-sm">Hello, {user?.user_metadata?.first_name || 'friend'}.</h1>
           <Button variant="secondary" onClick={handleUpload} disabled={uploading}>
             {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             Upload Video
@@ -139,7 +152,7 @@ export default function Dashboard() {
         </div>
 
         <motion.div
-          className="bg-[#111] border border-zinc-800 rounded-2xl p-6 mb-10 w-full max-w-4xl mx-auto"
+          className="bg-[#111]/80 border border-zinc-800 rounded-2xl p-6 mb-10 w-full max-w-4xl mx-auto backdrop-blur-sm shadow-lg"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.4 }}
@@ -155,12 +168,12 @@ export default function Dashboard() {
               placeholder="Video Title"
               value={videoTitle}
               onChange={(e) => setVideoTitle(e.target.value)}
-              className="bg-black border border-white/20 rounded-lg p-2"
+              className="bg-black/50 border border-white/20 rounded-lg p-2 backdrop-blur-md"
             />
             <select
               value={videoCategory}
               onChange={(e) => setVideoCategory(e.target.value)}
-              className="bg-black border border-white/20 rounded-lg p-2"
+              className="bg-black/50 border border-white/20 rounded-lg p-2 backdrop-blur-md"
             >
               <option value="">Select Category</option>
               <option value="education">🎓 Education</option>
@@ -174,7 +187,7 @@ export default function Dashboard() {
             placeholder="Describe what’s happening in the video..."
             value={videoDescription}
             onChange={(e) => setVideoDescription(e.target.value)}
-            className="w-full bg-black border border-white/20 rounded-lg p-2 mt-4"
+            className="w-full bg-black/50 border border-white/20 rounded-lg p-2 mt-4 backdrop-blur-md"
           />
 
           <label className="flex items-center mt-4 text-sm">
@@ -188,17 +201,17 @@ export default function Dashboard() {
           </label>
 
           <input
+            ref={fileInputRef}
             type="file"
             accept="video/*"
             onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-            className="mt-4 text-sm file:text-white file:bg-zinc-800 file:rounded-md"
+            className="hidden"
           />
 
           {selectedFile && (
             <video
               controls
-              className="mt-4 rounded-md border border-white/10"
-              width="100%"
+              className="mt-4 rounded-md border border-white/10 w-full"
             >
               <source src={URL.createObjectURL(selectedFile)} />
               Your browser does not support the video tag.
@@ -215,7 +228,12 @@ export default function Dashboard() {
             </motion.div>
           )}
 
-          <div className="mt-6 border border-dashed border-zinc-600 rounded-lg p-6 text-center text-zinc-400">
+          <div
+            className="mt-6 border border-dashed border-zinc-600 rounded-lg p-6 text-center text-zinc-400 cursor-pointer hover:bg-zinc-800/70 transition-colors"
+            onClick={handleBrowseClick}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleDrop}
+          >
             Drag & drop your video here or click to browse files
           </div>
         </motion.div>
@@ -229,7 +247,7 @@ export default function Dashboard() {
               videos.map((video) => (
                 <motion.div
                   key={video.id}
-                  className="bg-[#111] rounded-xl border border-zinc-800 p-4"
+                  className="bg-[#111]/80 rounded-xl border border-zinc-800 p-4 shadow"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
