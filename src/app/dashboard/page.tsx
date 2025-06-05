@@ -123,7 +123,7 @@ export default function Dashboard() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <aside className="w-64 bg-gradient-to-b from-black to-zinc-900 border-r border-zinc-800 p-6 flex flex-col justify-between shadow-xl">
+      <aside className="w-64 bg-black border-r border-zinc-800 p-6 flex flex-col justify-between">
         <div>
           <motion.div
             className="mb-8 cursor-pointer"
@@ -134,17 +134,15 @@ export default function Dashboard() {
             <Image src="/seenailogo.png" alt="SeenAI Logo" width={60} height={60} />
           </motion.div>
           <nav className="flex flex-col gap-4 text-zinc-400">
-            <a href="#" className="hover:text-white transition-colors">Dashboard</a>
-            <a href="#" className="hover:text-white transition-colors">Upload</a>
-            <a href="#" className="hover:text-white transition-colors">Talk to SeenAI</a>
+            <a href="https://chatgpt.com/g/g-6807e8981c5881919b3abb34f11a3226-seenai" target="_blank" className="hover:text-white">Talk to SeenAI</a>
           </nav>
         </div>
         <div className="text-xs text-zinc-500">Logged in as: {user?.email || 'Loading...'}</div>
       </aside>
 
-      <main className="flex-1 bg-gradient-to-b from-[#0b0b0b] to-black p-10 overflow-y-auto">
+      <main className="flex-1 bg-[#0b0b0b] p-10 overflow-y-auto">
         <div className="flex justify-between items-center mb-10">
-          <h1 className="text-3xl font-bold drop-shadow-sm">Hello, {user?.user_metadata?.first_name || 'friend'}.</h1>
+          <h1 className="text-3xl font-bold">Hello, {user?.user_metadata?.first_name || 'friend'}.</h1>
           <Button variant="secondary" onClick={handleUpload} disabled={uploading}>
             {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             Upload Video
@@ -152,7 +150,7 @@ export default function Dashboard() {
         </div>
 
         <motion.div
-          className="bg-[#111]/80 border border-zinc-800 rounded-2xl p-6 mb-10 w-full max-w-4xl mx-auto backdrop-blur-sm shadow-lg"
+          className="bg-[#111] border border-zinc-800 rounded-2xl p-6 mb-10 w-full max-w-4xl mx-auto"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.4 }}
@@ -168,12 +166,12 @@ export default function Dashboard() {
               placeholder="Video Title"
               value={videoTitle}
               onChange={(e) => setVideoTitle(e.target.value)}
-              className="bg-black/50 border border-white/20 rounded-lg p-2 backdrop-blur-md"
+              className="bg-black border border-white/20 rounded-lg p-2"
             />
             <select
               value={videoCategory}
               onChange={(e) => setVideoCategory(e.target.value)}
-              className="bg-black/50 border border-white/20 rounded-lg p-2 backdrop-blur-md"
+              className="bg-black border border-white/20 rounded-lg p-2"
             >
               <option value="">Select Category</option>
               <option value="education">🎓 Education</option>
@@ -187,7 +185,7 @@ export default function Dashboard() {
             placeholder="Describe what’s happening in the video..."
             value={videoDescription}
             onChange={(e) => setVideoDescription(e.target.value)}
-            className="w-full bg-black/50 border border-white/20 rounded-lg p-2 mt-4 backdrop-blur-md"
+            className="w-full bg-black border border-white/20 rounded-lg p-2 mt-4"
           />
 
           <label className="flex items-center mt-4 text-sm">
@@ -211,7 +209,7 @@ export default function Dashboard() {
           {selectedFile && (
             <video
               controls
-              className="mt-4 rounded-md border border-white/10 w-full"
+              className="mt-4 rounded-md border border-white/10 max-h-80 w-full object-contain"
             >
               <source src={URL.createObjectURL(selectedFile)} />
               Your browser does not support the video tag.
@@ -229,7 +227,7 @@ export default function Dashboard() {
           )}
 
           <div
-            className="mt-6 border border-dashed border-zinc-600 rounded-lg p-6 text-center text-zinc-400 cursor-pointer hover:bg-zinc-800/70 transition-colors"
+            className="mt-6 border border-dashed border-zinc-600 rounded-lg p-6 text-center text-zinc-400 cursor-pointer hover:bg-zinc-800 transition-colors"
             onClick={handleBrowseClick}
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
@@ -247,7 +245,7 @@ export default function Dashboard() {
               videos.map((video) => (
                 <motion.div
                   key={video.id}
-                  className="bg-[#111]/80 rounded-xl border border-zinc-800 p-4 shadow"
+                  className="bg-[#111] rounded-xl border border-zinc-800 p-4"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
