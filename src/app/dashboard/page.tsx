@@ -120,49 +120,47 @@ export default function Dashboard() {
   };
 
   return (
-    <motion.div className="flex min-h-screen text-white" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-      <aside className="w-64 bg-black border-r border-zinc-800 p-6 flex flex-col justify-between">
-        <div>
-          <motion.a
-            href="https://seen-ai.com/"
-            className="mb-8 block"
-            whileHover={{ scale: 1.15 }}
-            transition={{ type: 'spring', stiffness: 300 }}
+    <motion.div className="flex flex-col md:flex-row min-h-screen text-white" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+      <aside className="w-full md:w-64 bg-black border-b md:border-b-0 md:border-r border-zinc-800 p-6 flex flex-row md:flex-col justify-between items-center md:items-start">
+        <motion.a
+          href="https://seen-ai.com/"
+          className="block"
+          whileHover={{ scale: 1.15 }}
+          transition={{ type: 'spring', stiffness: 300 }}
+        >
+          <Image src="/seenailogo.png" alt="SeenAI Logo" width={60} height={60} />
+        </motion.a>
+        <nav className="text-zinc-400 md:mt-8 text-sm">
+          <a
+            href="https://chatgpt.com/g/g-6807e8981c5881919b3abb34f11a3226-seenai"
+            target="_blank"
+            className="hover:text-white"
           >
-            <Image src="/seenailogo.png" alt="SeenAI Logo" width={60} height={60} />
-          </motion.a>
-          <nav className="flex flex-col gap-4 text-zinc-400 mt-8">
-            <a
-              href="https://chatgpt.com/g/g-6807e8981c5881919b3abb34f11a3226-seenai"
-              target="_blank"
-              className="hover:text-white"
-            >
-              Talk to SeenAI
-            </a>
-          </nav>
-        </div>
-        <div className="text-xs text-zinc-500">Logged in as: {user?.email || 'Loading...'}</div>
+            Talk to SeenAI
+          </a>
+        </nav>
+        <div className="text-xs text-zinc-500 hidden md:block mt-4">Logged in as: {user?.email || 'Loading...'}</div>
       </aside>
 
-      <main className="flex-1 bg-[#0b0b0b] p-10 overflow-y-auto">
-        <div className="bg-[#111] border border-zinc-800 rounded-2xl p-6 max-w-4xl mx-auto">
+      <main className="flex-1 bg-[#0b0b0b] p-4 sm:p-6 md:p-10 overflow-y-auto">
+        <div className="bg-[#111] border border-zinc-800 rounded-2xl p-4 sm:p-6 max-w-4xl mx-auto">
           <h2 className="text-xl font-semibold mb-2">Upload your video</h2>
           <p className="text-sm text-zinc-400 mb-4">
             SeenAI will analyze your tone, emotion, and transcript to give personalized feedback.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 gap-4">
             <input
               type="text"
               placeholder="Video Title"
               value={videoTitle}
               onChange={(e) => setVideoTitle(e.target.value)}
-              className="bg-black border border-white/20 rounded-lg p-2"
+              className="bg-black border border-white/20 rounded-lg p-2 w-full"
             />
             <select
               value={videoCategory}
               onChange={(e) => setVideoCategory(e.target.value)}
-              className="bg-black border border-white/20 rounded-lg p-2"
+              className="bg-black border border-white/20 rounded-lg p-2 w-full"
             >
               <option value="">Select Category</option>
               <option value="education">🎓 Education</option>
