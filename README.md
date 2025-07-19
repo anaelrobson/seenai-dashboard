@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SeenAI Dashboard
 
-## Getting Started
+A custom dashboard for uploading videos or audio to the SeenAI platform. Files are sent to the backend for analysis and the results – transcript, tone rating, emotional frames and more – are displayed in an easy to read format.
 
-First, run the development server:
+## Setup
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app is a standard [Next.js](https://nextjs.org/) project. Development server runs at `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## File Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/lib/` – Supabase client and video service helpers
+- `src/components/` – Reusable React components (upload form, sidebar, video cards)
+- `src/app/` – Next.js route handlers and pages
+- `public/` – Static assets
 
-## Learn More
+## Usage
 
-To learn more about Next.js, take a look at the following resources:
+1. Sign up or log in.
+2. Upload a video using the form on the dashboard.
+3. After processing, recent uploads and analysis results appear below the form.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The dashboard is prepared for future features such as sending results to GPT, exporting a PDF and saving to a personal library. These buttons are present but disabled by default.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- The backend `/analyze` endpoint is expected to return `frames`, `transcript` and `tone_rating` fields which will be displayed once available.
+- Supabase credentials are loaded from environment variables `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
