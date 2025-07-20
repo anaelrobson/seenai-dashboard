@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { uploadVideo } from '@/lib/videoService';
 import { Loader2, CheckCircle } from 'lucide-react';
@@ -65,7 +66,7 @@ export default function UploadForm({ userId, onUploaded }: Props) {
   };
 
   return (
-    <div className="bg-[#111] border border-zinc-800 rounded-2xl p-4 sm:p-6 max-w-4xl mx-auto">
+    <div className="bg-[#111] border border-zinc-800 rounded-2xl shadow-lg shadow-black/30 p-4 sm:p-6 max-w-4xl mx-auto">
       <h2 className="text-xl font-semibold mb-2">Upload your video</h2>
       <p className="text-sm text-zinc-400 mb-4">
         SeenAI will analyze your tone, emotion, and transcript to give personalized feedback.
@@ -77,18 +78,22 @@ export default function UploadForm({ userId, onUploaded }: Props) {
           placeholder="Video Title"
           value={videoTitle}
           onChange={(e) => setVideoTitle(e.target.value)}
-          className="bg-black border border-white/20 rounded-lg p-2 w-full"
+          className="bg-neutral-900 border border-zinc-700 rounded-lg p-2 w-full focus:ring-1 focus:ring-white"
         />
         <select
           value={videoCategory}
           onChange={(e) => setVideoCategory(e.target.value)}
-          className="bg-black border border-white/20 rounded-lg p-2 w-full"
+          className="bg-neutral-900 border border-zinc-700 rounded-lg p-2 w-full focus:ring-1 focus:ring-white"
         >
           <option value="">Select Category</option>
           <option value="education">🎓 Education</option>
           <option value="pitch">📈 Pitch</option>
           <option value="speaking">🎙️ Speaking</option>
-          <option value="freestyle">🎤 Freestyle</option>
+          <option value="interview">🤝 Interview</option>
+          <option value="youtube">📺 YouTube Monologue</option>
+          <option value="podcast">🎧 Podcast Clip</option>
+          <option value="speech">🗣️ Speech Practice</option>
+          <option value="tiktok">📱 TikTok Video</option>
         </select>
       </div>
 
@@ -96,7 +101,7 @@ export default function UploadForm({ userId, onUploaded }: Props) {
         placeholder="Describe what’s happening in the video..."
         value={videoDescription}
         onChange={(e) => setVideoDescription(e.target.value)}
-        className="w-full bg-black border border-white/20 rounded-lg p-2 mt-4"
+        className="w-full bg-neutral-900 border border-zinc-700 rounded-lg p-2 mt-4 focus:ring-1 focus:ring-white"
       />
 
       <label className="flex items-center mt-4 text-sm">
@@ -118,13 +123,18 @@ export default function UploadForm({ userId, onUploaded }: Props) {
 
       {errorMessage && <p className="mt-4 text-red-500 text-sm">{errorMessage}</p>}
       {successMessage && (
-        <div className="mt-4 flex items-center gap-2 text-green-500 text-sm">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mt-4 flex items-center gap-2 text-green-500 text-sm"
+        >
           <CheckCircle size={16} /> Upload successful!
-        </div>
+        </motion.div>
       )}
 
-      <div
-        className="mt-6 border border-dashed border-zinc-600 rounded-lg p-6 text-center text-zinc-400 hover:border-white cursor-pointer"
+      <motion.div
+        className="mt-6 border border-dashed border-zinc-600 rounded-lg p-6 text-center text-zinc-400 hover:border-white/80 hover:bg-neutral-900/40 cursor-pointer transition-colors"
+        whileHover={{ scale: 1.02 }}
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
         onClick={handleBrowseClick}
@@ -137,7 +147,7 @@ export default function UploadForm({ userId, onUploaded }: Props) {
           hidden
           onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
         />
-      </div>
+      </motion.div>
 
       <div className="mt-4 text-right">
         <Button onClick={handleUpload} disabled={uploading}>

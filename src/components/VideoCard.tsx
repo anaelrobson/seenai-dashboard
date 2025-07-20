@@ -10,9 +10,9 @@ export default function VideoCard({ video }: { video: Video }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-[#111] rounded-xl border border-zinc-800 p-4"
+      className="bg-[#111] rounded-2xl border border-zinc-800 shadow-lg shadow-black/30 p-4"
     >
-      <div className="bg-zinc-900 h-40 rounded-lg mb-2 flex items-center justify-center text-zinc-600 text-sm overflow-hidden">
+      <div className="bg-zinc-900 h-40 rounded-xl mb-2 flex items-center justify-center text-zinc-600 text-sm overflow-hidden">
         {video.thumbnail_url ? (
           <Image src={video.thumbnail_url} alt={video.title} width={160} height={90} className="object-cover w-full h-full" />
         ) : (
@@ -39,7 +39,7 @@ export default function VideoCard({ video }: { video: Video }) {
               alt={`Frame ${f.timestamp}`}
               width={80}
               height={45}
-              className="rounded"
+              className="rounded-lg"
             />
           ))}
         </div>

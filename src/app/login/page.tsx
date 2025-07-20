@@ -73,7 +73,7 @@ export default function LoginPage() {
         rel="noopener noreferrer"
         className="absolute bottom-6 right-6 opacity-60 hover:opacity-100 hover:scale-110 transition-transform duration-300"
       >
-        <Image src="/seenailogo.png" alt="SeenAI logo" width={48} height={48} />
+        <Image src="/logo.svg" alt="SeenAI logo" width={48} height={48} />
       </a>
     </div>
   )

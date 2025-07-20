@@ -1,17 +1,11 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "SeenAI",
+  "short_name": "SeenAI",
   "icons": [
     {
-      "src": "//favicon.ico/web-app-manifest-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "//favicon.ico/web-app-manifest-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "maskable"
     }
   ],
