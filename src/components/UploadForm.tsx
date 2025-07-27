@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { uploadVideo } from '@/lib/videoService';
+import { uploadVideo, analyzeVideo } from '@/lib/videoService';
 import { Loader2, CheckCircle } from 'lucide-react';
 
 interface Props {
@@ -18,6 +18,7 @@ export default function UploadForm({ userId, onUploaded }: Props) {
   const [uploading, setUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<Record<string, unknown> | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleUpload = async () => {
@@ -29,6 +30,7 @@ export default function UploadForm({ userId, onUploaded }: Props) {
     if (!selectedFile) return setErrorMessage('Please select a video file.');
 
     setUploading(true);
+    setAnalysisResult(null);
     try {
       await uploadVideo({
         userId,
@@ -38,6 +40,10 @@ export default function UploadForm({ userId, onUploaded }: Props) {
         description: videoDescription,
         toneEnabled,
       });
+
+      const result = await analyzeVideo(selectedFile);
+      setAnalysisResult(result);
+
       setVideoTitle('');
       setVideoCategory('');
       setVideoDescription('');
@@ -48,6 +54,7 @@ export default function UploadForm({ userId, onUploaded }: Props) {
     } catch (err) {
       setErrorMessage('Upload failed.');
       console.error(err);
+      setAnalysisResult(null);
     } finally {
       setUploading(false);
     }
@@ -121,6 +128,12 @@ export default function UploadForm({ userId, onUploaded }: Props) {
         <div className="mt-4 flex items-center gap-2 text-green-500 text-sm">
           <CheckCircle size={16} /> Upload successful!
         </div>
+      )}
+
+      {analysisResult && (
+        <pre className="mt-4 bg-black border border-white/20 rounded-lg p-2 text-xs overflow-x-auto">
+          {JSON.stringify(analysisResult, null, 2)}
+        </pre>
       )}
 
       <div

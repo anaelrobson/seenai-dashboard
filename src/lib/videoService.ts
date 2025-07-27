@@ -65,3 +65,22 @@ export async function uploadVideo({
 
   if (insertError) throw insertError;
 }
+
+export async function analyzeVideo(file: File): Promise<Record<string, unknown>> {
+  const formData = new FormData();
+  formData.append('video', file);
+
+  const res = await fetch(
+    'https://seenai-unified-backend-production.up.railway.app/analyze',
+    {
+      method: 'POST',
+      body: formData,
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error('Failed to analyze video');
+  }
+
+  return (await res.json()) as Record<string, unknown>;
+}
