@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import { fetchVideos, Video } from '@/lib/videoService';
 import { motion } from 'framer-motion';
 import Sidebar from '@/components/Sidebar';
