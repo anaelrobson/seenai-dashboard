@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase } from './supabase';
 
 export interface Video {
   id: string;
@@ -40,15 +40,15 @@ export async function uploadVideo({
   toneEnabled: boolean;
 }) {
   const fileExt = file.name.split('.').pop();
-  const filePath = `${userId}/${Date.now()}.${fileExt}`;
+  const filePath = `${userId}/${crypto.randomUUID()}.${fileExt}`;
 
   const { error: uploadError } = await supabase.storage
-    .from('user-uploads')
-    .upload(filePath, file);
+    .from('videos')
+    .upload(filePath, file, { upsert: false });
 
   if (uploadError) throw uploadError;
 
-  const { data: urlData } = supabase.storage.from('user-uploads').getPublicUrl(filePath);
+  const { data: urlData } = supabase.storage.from('videos').getPublicUrl(filePath);
 
   const { error: insertError } = await supabase.from('videos').insert([
     {
